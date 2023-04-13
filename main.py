@@ -2,7 +2,7 @@ import sys
 from PyQt5.uic import loadUi
 from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import QDial, QDialog, QApplication, QStackedWidget, QFileDialog
-from hashlib import sha1
+from hashlib import sha3_256
 import rsa_encrypt
 
 class HomeScreen(QDialog):
@@ -62,7 +62,7 @@ class KeygenScreen(QDialog):
         if(fname[0] == ''):
             self.warning_msg("Error","Please choose key file!")
         else:
-            with open(fname[0], "r") as file:
+            with open(fname[0], "r", encoding="utf8") as file:
                 key = file.read().split(" ")
             self.nKey.setText(key[1])
             self.eKey.setText(key[0])
@@ -72,7 +72,7 @@ class KeygenScreen(QDialog):
         if(fname[0] == ''):
             self.warning_msg("Error","Please choose key file!")
         else:
-            with open(fname[0], "r") as file:
+            with open(fname[0], "r", encoding="utf8") as file:
                 key = file.read().split(" ")
             self.nKey.setText(key[1])
             self.dKey.setText(key[0])
@@ -112,7 +112,7 @@ class SignScreen(QDialog):
         if(fname[0] == ''):
             self.warning_msg("Error","Please choose key file!")
         else:
-            with open(fname[0], "r") as file:
+            with open(fname[0], "r", encoding="utf8") as file:
                 key = file.read().split(" ")
             self.nKey.setText(key[1])
             self.dKey.setText(key[0])
@@ -151,14 +151,14 @@ class SignScreen(QDialog):
                 self.outputFileField.setReadOnly(False)
         
     def button_input_state2(self, b):
-        if b.text() == "Separate File":
+        if b.text() == "Pisah File":
             if b.isChecked():
-                self.signatureLocation = "Separate File"
+                self.signatureLocation = "Pisah File"
                 self.infile = False
                 self.outputFileField.setReadOnly(False)
-        elif b.text() == "Inside File":
+        elif b.text() == "Gabung":
             if b.isChecked():
-                self.signatureLocation = "Inside File"
+                self.signatureLocation = "Gabung"
                 self.infile = True
                 if self.keyboard == False:
                     self.outputFileField.setReadOnly(True)
@@ -166,7 +166,7 @@ class SignScreen(QDialog):
     def get_message(self):
         if (self.fileInputMethod == "File"):
             path = self.inputFileField.text()
-            with open(path, "r") as file:
+            with open(path, "rb", encoding="utf8") as file:
                 self.message = file.read()
         else:
             self.message = self.inputKeyboardField.text()
@@ -187,21 +187,21 @@ class SignScreen(QDialog):
         self.get_key()
         self.get_output_path()
 
-        hash_message = int(sha1(self.message.encode()).hexdigest(), 16)
+        hash_message = int(sha3_256(self.message.encode()).hexdigest(), 16)
         sign = self.rsa.sign_rsa(hash_message, self.key[1], self.key[0])
 
         if self.fileInputMethod == 'Keyboard':
-            with open(self.outputMsgPath, "w") as f:
+            with open(self.outputMsgPath, "w", encoding="utf8") as f:
                 f.write(self.message + '\n')
             
-            if self.signatureLocation == "Inside File":
+            if self.signatureLocation == "Gabung":
                 self.rsa.save_inside(sign, self.outputMsgPath)
-            elif self.signatureLocation == "Separate File":
+            elif self.signatureLocation == "Pisah File":
                 self.rsa.save_newfile(sign, self.outputPath)
         else:
-            if self.signatureLocation == "Inside File":
+            if self.signatureLocation == "Gabung":
                 self.rsa.save_inside(sign, self.inputFileField.text())
-            elif self.signatureLocation == "Separate File":
+            elif self.signatureLocation == "Pisah File":
                 self.rsa.save_newfile(sign, self.outputPath)
         self.Status.setText('Signing Success!')
 
@@ -240,7 +240,7 @@ class VerifyScreen(QDialog):
         if(fname[0] == ''):
             self.warning_msg("Error","Please choose key file!")
         else:
-            with open(fname[0], "r") as file:
+            with open(fname[0], "r", encoding="utf8") as file:
                 key = file.read().split(" ")
             self.nKey.setText(key[1])
             self.eKey.setText(key[0])
@@ -252,22 +252,22 @@ class VerifyScreen(QDialog):
         self.signatureFileField.setText(s_file[0])
     
     def button_input_state(self, b):
-        if b.text() == "Separate File":
+        if b.text() == "Pisah File":
             if b.isChecked():
                 self.messageFileButton.setEnabled(True)
                 self.signatureFileButton.setEnabled(True)
-                self.signatureLocation = "Separate File"
-        elif b.text() == "Inside File":
+                self.signatureLocation = "Pisah File"
+        elif b.text() == "Gabung":
             if b.isChecked():
                 self.messageFileButton.setEnabled(True)
                 self.signatureFileButton.setEnabled(False)
-                self.signatureLocation = "Inside File"
+                self.signatureLocation = "Gabung"
                 self.signatureFileField.setText("")
     
     def get_message(self):
-        if self.signatureLocation == "Separate File":
+        if self.signatureLocation == "Pisah File":
             self.message, self.signature = self.rsa.read_newfile(self.messageField.text(), self.signatureFileField.text())
-        elif self.signatureLocation == "Inside File":
+        elif self.signatureLocation == "Gabung":
             self.message, self.signature = self.rsa.read_inside(self.messageField.text())
     
     def get_key(self):
@@ -280,7 +280,7 @@ class VerifyScreen(QDialog):
         self.get_message()
         self.get_key()
 
-        hash_message = int(sha1(self.message.encode()).hexdigest(), 16)
+        hash_message = int(sha3_256(self.message.encode()).hexdigest(), 16)
 
         if (self.nKey.text() != "" and self.eKey.text() != ""):
             verify = self.rsa.verify_rsa(self.signature, self.key[1], self.key[0], hash_message)
