@@ -196,14 +196,14 @@ class SignScreen(QDialog):
             
             if self.signatureLocation == "Gabung":
                 self.rsa.save_inside(sign, self.outputMsgPath)
-            elif self.signatureLocation == "Pisah File":
+            elif self.signatureLocation == "Separate File":
                 self.rsa.save_newfile(sign, self.outputPath)
         else:
             if self.signatureLocation == "Gabung":
                 self.rsa.save_inside(sign, self.inputFileField.text())
-            elif self.signatureLocation == "Pisah File":
+            elif self.signatureLocation == "Separate File":
                 self.rsa.save_newfile(sign, self.outputPath)
-        self.Status.setText('Signing Success!')
+        self.Status.setText('Tertandatangani!')
 
 class VerifyScreen(QDialog):
     def __init__(self):
@@ -252,12 +252,12 @@ class VerifyScreen(QDialog):
         self.signatureFileField.setText(s_file[0])
     
     def button_input_state(self, b):
-        if b.text() == "Pisah File":
+        if b.text() == "Separate File":
             if b.isChecked():
                 self.messageFileButton.setEnabled(True)
                 self.signatureFileButton.setEnabled(True)
-                self.signatureLocation = "Pisah File"
-        elif b.text() == "Gabung":
+                self.signatureLocation = "Separate File"
+        elif b.text() == "Inside File":
             if b.isChecked():
                 self.messageFileButton.setEnabled(True)
                 self.signatureFileButton.setEnabled(False)
@@ -265,7 +265,7 @@ class VerifyScreen(QDialog):
                 self.signatureFileField.setText("")
     
     def get_message(self):
-        if self.signatureLocation == "Pisah File":
+        if self.signatureLocation == "Separate File":
             self.message, self.signature = self.rsa.read_newfile(self.messageField.text(), self.signatureFileField.text())
         elif self.signatureLocation == "Gabung":
             self.message, self.signature = self.rsa.read_inside(self.messageField.text())
@@ -286,11 +286,11 @@ class VerifyScreen(QDialog):
             verify = self.rsa.verify_rsa(self.signature, self.key[1], self.key[0], hash_message)
 
             if verify:
-                self.Status.setText('Verification Success!')
+                self.Status.setText('Verification Sukses!')
             else:
-                self.Status.setText('Verification Failed!')
+                self.Status.setText('Verification Gagal!')
         else:
-            self.Status.setText('Signature not found!')
+            self.Status.setText('TTD tidak ada!')
 
 def back():
     widget.removeWidget(widget.currentWidget())
