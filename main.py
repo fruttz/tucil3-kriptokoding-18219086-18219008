@@ -151,14 +151,14 @@ class SignScreen(QDialog):
                 self.outputFileField.setReadOnly(False)
         
     def button_input_state2(self, b):
-        if b.text() == "Separate File":
+        if b.text() == "Pisah file":
             if b.isChecked():
-                self.signatureLocation = "Separate File"
+                self.signatureLocation = "Pisah file"
                 self.infile = False
                 self.outputFileField.setReadOnly(False)
-        elif b.text() == "Inside File":
+        elif b.text() == "Gabung":
             if b.isChecked():
-                self.signatureLocation = "Inside File"
+                self.signatureLocation = "Gabung"
                 self.infile = True
                 if self.keyboard == False:
                     self.outputFileField.setReadOnly(True)
@@ -194,16 +194,16 @@ class SignScreen(QDialog):
             with open(self.outputMsgPath, "w") as f:
                 f.write(self.message + '\n')
             
-            if self.signatureLocation == "Inside File":
+            if self.signatureLocation == "Gabung":
                 self.rsa.save_inside(sign, self.outputMsgPath)
-            elif self.signatureLocation == "Separate File":
+            elif self.signatureLocation == "Pisah file":
                 self.rsa.save_newfile(sign, self.outputPath)
         else:
-            if self.signatureLocation == "Inside File":
+            if self.signatureLocation == "Gabung":
                 self.rsa.save_inside(sign, self.inputFileField.text())
-            elif self.signatureLocation == "Separate File":
+            elif self.signatureLocation == "Pisah file":
                 self.rsa.save_newfile(sign, self.outputPath)
-        self.Status.setText('Signing Success!')
+        self.Status.setText('Tertandatangani!')
 
 class VerifyScreen(QDialog):
     def __init__(self):
@@ -252,22 +252,22 @@ class VerifyScreen(QDialog):
         self.signatureFileField.setText(s_file[0])
     
     def button_input_state(self, b):
-        if b.text() == "Separate File":
+        if b.text() == "Pisah file":
             if b.isChecked():
                 self.messageFileButton.setEnabled(True)
                 self.signatureFileButton.setEnabled(True)
-                self.signatureLocation = "Separate File"
-        elif b.text() == "Inside File":
+                self.signatureLocation = "Pisah file"
+        elif b.text() == "Gabung":
             if b.isChecked():
                 self.messageFileButton.setEnabled(True)
                 self.signatureFileButton.setEnabled(False)
-                self.signatureLocation = "Inside File"
+                self.signatureLocation = "Gabung"
                 self.signatureFileField.setText("")
     
     def get_message(self):
-        if self.signatureLocation == "Separate File":
+        if self.signatureLocation == "Pisah file":
             self.message, self.signature = self.rsa.read_newfile(self.messageField.text(), self.signatureFileField.text())
-        elif self.signatureLocation == "Inside File":
+        elif self.signatureLocation == "Gabung":
             self.message, self.signature = self.rsa.read_inside(self.messageField.text())
     
     def get_key(self):
@@ -286,11 +286,11 @@ class VerifyScreen(QDialog):
             verify = self.rsa.verify_rsa(self.signature, self.key[1], self.key[0], hash_message)
 
             if verify:
-                self.Status.setText('Verification Success!')
+                self.Status.setText('Verification Sukses!')
             else:
-                self.Status.setText('Verification Failed!')
+                self.Status.setText('Verification Gagal!')
         else:
-            self.Status.setText('Signature not found!')
+            self.Status.setText('TTD tidak ada!')
 
 def back():
     widget.removeWidget(widget.currentWidget())
